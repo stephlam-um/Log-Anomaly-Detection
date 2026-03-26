@@ -1,0 +1,15 @@
+# config.yaml — Tunable parameters for Log Anomaly Detection
+
+detector:
+  contamination: 0.05      # Expected fraction of anomalies (0.0 – 0.5)
+  n_estimators: 200        # Number of isolation trees (higher = more stable, slower)
+  max_samples: auto        # Samples per tree ("auto" = min(256, n_samples))
+  random_state: 42
+
+features:
+  window_size_minutes: 5   # (future) sliding window aggregation size
+
+output:
+  directory: output/
+  save_plots: true
+  save_csv: true
