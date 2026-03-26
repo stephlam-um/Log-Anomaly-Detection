@@ -36,19 +36,18 @@ Raw Logs → Parsing → Feature Extraction → Isolation Forest → Anomaly Sco
 ```
 log-anomaly-detection/
 ├── src/
-│   ├── ingestor.py          # Log file reader & format dispatcher
-│   ├── parser.py            # Regex-based log parsing (Apache, syslog, generic)
-│   ├── features.py          # Feature extraction & engineering
-│   ├── detector.py          # Isolation Forest model wrapper
-│   └── visualizer.py        # Matplotlib-based plotting & reporting
+│   ├── ingestor.py          # Log file reader & format dispatcher (streaming + batch)
+│   ├── parser.py            # Regex-based log parsing (Apache, nginx, syslog, generic)
+│   ├── features.py          # Feature extraction & engineering (9 numeric features)
+│   ├── detector.py          # Isolation Forest model wrapper with score normalisation
+│   └── visualizer.py        # Matplotlib plots (score distribution, timeline) & CSV export
 ├── data/
 │   └── sample_logs/         # Anonymized sample log files for testing
-├── notebooks/
-│   └── exploration.ipynb    # EDA & model tuning experiments
+├── notebooks/               # EDA & model tuning experiments (TODO: exploration.ipynb)
 ├── tests/
 │   ├── test_parser.py
-│   ├── test_features.py
-│   └── test_detector.py
+│   ├── test_detector.py
+│   └── test_features.py     # TODO: not yet written
 ├── docs/
 │   └── design_notes.md      # Architecture decisions & open questions
 ├── requirements.txt
@@ -62,7 +61,7 @@ log-anomaly-detection/
 
 ```bash
 # Clone & install
-git clone https://github.com/YOUR_USERNAME/log-anomaly-detection.git
+git clone https://github.com/stephlam-um/log-anomaly-detection.git
 cd log-anomaly-detection
 pip install -r requirements.txt
 
@@ -77,16 +76,20 @@ python main.py --input /var/log/nginx/access.log --format nginx --config config.
 
 ## Current Status
 
-| Component         | Status        |
-|-------------------|---------------|
-| Log ingestion     | ✅ Done        |
-| Apache parser     | ✅ Done        |
-| Syslog parser     | 🔧 In progress |
-| Feature extraction| ✅ Done        |
-| Isolation Forest  | ✅ Done        |
-| Visualization     | 🔧 In progress |
-| Tests             | 🔧 In progress |
-| Docs              | 📝 Planned     |
+| Component              | Status              |
+|------------------------|---------------------|
+| Log ingestion          | ✅ Done              |
+| Apache parser          | ✅ Done              |
+| Nginx parser           | ✅ Done              |
+| Syslog parser (RFC 3164)| ✅ Done             |
+| Feature extraction     | ✅ Done (9 features) |
+| Isolation Forest       | ✅ Done              |
+| Visualization          | ✅ Done              |
+| Tests – parser         | ✅ Done              |
+| Tests – detector       | ✅ Done              |
+| Tests – features       | ❌ Missing           |
+| Docs                   | ✅ Done              |
+| Notebook (EDA)         | ❌ Missing           |
 
 ---
 
@@ -102,11 +105,22 @@ python main.py --input /var/log/nginx/access.log --format nginx --config config.
 
 ## Roadmap
 
-- [ ] Add support for Windows Event Log (EVTX) parsing
-- [ ] Sliding-window aggregation for time-series anomaly detection
-- [ ] Interactive HTML report output
-- [ ] Baseline comparison against LOF and One-Class SVM
-- [ ] Docker container for easy deployment
+### Near-term (gaps in current implementation)
+- [ ] Write `tests/test_features.py` — `FeatureExtractor` has no test coverage
+- [ ] Add `notebooks/exploration.ipynb` — EDA on sample logs, contamination tuning, score distribution analysis
+- [ ] Syslog RFC 5424 support — current regex only handles RFC 3164 (no structured data fields)
+- [ ] Model persistence — save/load trained model with `joblib` so inference can run without retraining on every invocation
+
+### Medium-term (capability improvements)
+- [ ] Sliding-window aggregation — aggregate features into fixed time buckets (e.g. 5-min windows) instead of per-row; critical for detecting patterns that span multiple requests (scanning, slow brute-force)
+- [ ] Contamination calibration — interactive or config-driven method for analysts to tune the `contamination` hyperparameter against their environment baseline
+- [ ] Windows Event Log (EVTX) parsing — extend parser to handle `.evtx` files via `python-evtx`
+- [ ] Interactive HTML report output — self-contained report with Plotly/Jinja2 instead of static PNGs
+
+### Longer-term (research / production)
+- [ ] Streaming / real-time mode — tail a live log file or consume from Kafka/syslog UDP instead of batch processing
+- [ ] Baseline comparison — benchmark Isolation Forest against LOF and One-Class SVM on the same feature set; document trade-offs in `docs/`
+- [ ] Docker container — containerise the pipeline for easy deployment in SOC environments
 
 ---
 
