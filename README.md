@@ -61,8 +61,8 @@ log-anomaly-detection/
 
 ```bash
 # Clone & install
-git clone https://github.com/stephlam-um/log-anomaly-detection.git
-cd log-anomaly-detection
+git clone https://github.com/stephlam-um/Log-Anomaly-Detection.git
+cd Log-Anomaly-Detection
 pip install -r requirements.txt
 
 # Run on sample data
@@ -87,9 +87,9 @@ python main.py --input /var/log/nginx/access.log --format nginx --config config.
 | Visualization          | ✅ Done              |
 | Tests – parser         | ✅ Done              |
 | Tests – detector       | ✅ Done              |
-| Tests – features       | ❌ Missing           |
+| Tests – features       | ❌ In Progress       |
 | Docs                   | ✅ Done              |
-| Notebook (EDA)         | ❌ Missing           |
+| Notebook (EDA)         | ❌ In Progress       |
 
 ---
 
