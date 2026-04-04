@@ -1,66 +1,46 @@
-# 🔍 Log Anomaly Detection
+# Log Anomaly Detection
 
-> ML-based log analysis tool using Isolation Forest to detect anomalous patterns in server and network logs.
+A practical log analysis tool for identifying anomalous patterns in system and network logs.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4+-orange?style=flat-square&logo=scikit-learn)
-![Status](https://img.shields.io/badge/Status-In%20Progress-yellow?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
 
-## Motivation
+## What it does
 
-After 1.5 years working in a live SOC environment, I repeatedly ran into the same bottleneck: analysts spending hours manually triaging alerts, many of which turned out to be noise. Most SIEM tools either flood you with false positives or require expensive rule-writing to reduce them.
-
-This project is my attempt to apply unsupervised ML — specifically Isolation Forest — to automatically surface genuinely anomalous log patterns, reducing manual triage overhead and helping analysts focus on what actually matters.
-
----
-
-## How It Works
-
-```
-Raw Logs → Parsing → Feature Extraction → Isolation Forest → Anomaly Scores → Visualization
-```
-
-1. **Ingestion** – Reads raw server/network logs (Apache, syslog, custom formats)
-2. **Parsing** – Extracts structured fields (IP, timestamp, status code, bytes, method, etc.)
-3. **Feature Engineering** – Constructs numeric feature vectors (request rate, error ratio, byte volume, hour-of-day, etc.)
-4. **Isolation Forest** – Trains an unsupervised model; assigns anomaly scores to each log window
-5. **Visualization** – Plots anomaly score timelines, highlights flagged events, exports reports
+- Parses logs and extracts features (frequency, timing, entropy patterns)
+- Uses Isolation Forest to detect anomalies
+- Produces simple, actionable output for alert triage
 
 ---
 
-## Project Structure
+## Why it matters
+
+Built from observations during SOC experience—anomaly detection handles high-volume alert triage better than manual rules, but lacks context. This project explores both anomaly-based and rule-based approaches, with future investigation into provenance-based detection (tracking event relationships rather than isolated patterns).
+
+**Key learning:** Effective detection requires understanding trade-offs between automation and interpretability.
+
+---
+
+## How it works
 
 ```
-log-anomaly-detection/
-├── src/
-│   ├── ingestor.py          # Log file reader & format dispatcher (streaming + batch)
-│   ├── parser.py            # Regex-based log parsing (Apache, nginx, syslog, generic)
-│   ├── features.py          # Feature extraction & engineering (9 numeric features)
-│   ├── detector.py          # Isolation Forest model wrapper with score normalisation
-│   └── visualizer.py        # Matplotlib plots (score distribution, timeline) & CSV export
-├── data/
-│   └── sample_logs/         # Anonymized sample log files for testing
-├── notebooks/               # EDA & model tuning experiments (TODO: exploration.ipynb)
-├── tests/
-│   ├── test_parser.py
-│   ├── test_detector.py
-│   └── test_features.py     # TODO: not yet written
-├── docs/
-│   └── design_notes.md      # Architecture decisions & open questions
-├── requirements.txt
-├── config.yaml              # Tunable parameters (contamination rate, window size, etc.)
-└── main.py                  # CLI entry point
+Raw Logs → Parsing → Feature Extraction → Isolation Forest → Anomaly Scores → Output
 ```
+
+1. **Ingestion** – Reads raw server/network logs (Apache, nginx, syslog)
+2. **Parsing** – Extracts structured fields (IP, timestamp, status code, bytes, method)
+3. **Feature Engineering** – Constructs numeric feature vectors (request rate, error ratio, byte volume, hour-of-day)
+4. **Isolation Forest** – Trains an unsupervised model; assigns anomaly scores to each log entry
+5. **Output** – Score distribution plot, timeline, and CSV of flagged events for analyst review
 
 ---
 
 ## Quickstart
 
 ```bash
-# Clone & install
 git clone https://github.com/stephlam-um/Log-Anomaly-Detection.git
 cd Log-Anomaly-Detection
 pip install -r requirements.txt
@@ -72,61 +52,51 @@ python main.py --input data/sample_logs/apache_sample.log --format apache
 python main.py --input /var/log/nginx/access.log --format nginx --config config.yaml
 ```
 
----
-
-## Current Status
-
-| Component              | Status              |
-|------------------------|---------------------|
-| Log ingestion          | ✅ Done              |
-| Apache parser          | ✅ Done              |
-| Nginx parser           | ✅ Done              |
-| Syslog parser (RFC 3164)| ✅ Done             |
-| Feature extraction     | ✅ Done (9 features) |
-| Isolation Forest       | ✅ Done              |
-| Visualization          | ✅ Done              |
-| Tests – parser         | ✅ Done              |
-| Tests – detector       | ✅ Done              |
-| Tests – features       | ❌ In Progress       |
-| Docs                   | ✅ Done              |
-| Notebook (EDA)         | ❌ In Progress       |
+Output is written to `output/`: score distribution plot, timeline, and `flagged_events.csv`.
 
 ---
 
-## Tech Stack
+## Detection approach comparison
 
-- **Python 3.10+**
-- **scikit-learn** – Isolation Forest implementation
-- **pandas** – Log data manipulation
-- **matplotlib / seaborn** – Anomaly visualization
-- **PyYAML** – Config management
+See [comparison_analysis.md](comparison_analysis.md) for a side-by-side comparison of anomaly-based vs. rule-based detection on the same log data — including where each approach succeeds and where it falls short.
 
 ---
 
-## Roadmap
+## Project structure
 
-### Near-term (gaps in current implementation)
-- [ ] Write `tests/test_features.py` — `FeatureExtractor` has no test coverage
-- [ ] Add `notebooks/exploration.ipynb` — EDA on sample logs, contamination tuning, score distribution analysis
-- [ ] Syslog RFC 5424 support — current regex only handles RFC 3164 (no structured data fields)
-- [ ] Model persistence — save/load trained model with `joblib` so inference can run without retraining on every invocation
-
-### Medium-term (capability improvements)
-- [ ] Sliding-window aggregation — aggregate features into fixed time buckets (e.g. 5-min windows) instead of per-row; critical for detecting patterns that span multiple requests (scanning, slow brute-force)
-- [ ] Contamination calibration — interactive or config-driven method for analysts to tune the `contamination` hyperparameter against their environment baseline
-- [ ] Windows Event Log (EVTX) parsing — extend parser to handle `.evtx` files via `python-evtx`
-- [ ] Interactive HTML report output — self-contained report with Plotly/Jinja2 instead of static PNGs
-
-### Longer-term (research / production)
-- [ ] Streaming / real-time mode — tail a live log file or consume from Kafka/syslog UDP instead of batch processing
-- [ ] Baseline comparison — benchmark Isolation Forest against LOF and One-Class SVM on the same feature set; document trade-offs in `docs/`
-- [ ] Docker container — containerise the pipeline for easy deployment in SOC environments
+```
+log-anomaly-detection/
+├── src/
+│   ├── ingestor.py      # Log file reader
+│   ├── parser.py        # Regex-based parsing (Apache, nginx, syslog)
+│   ├── features.py      # Feature extraction (9 numeric features)
+│   ├── detector.py      # Isolation Forest wrapper
+│   └── visualizer.py    # Score plots and CSV export
+├── data/
+│   └── sample_logs/     # Sample logs for testing
+├── tests/
+│   ├── test_parser.py
+│   └── test_detector.py
+├── docs/
+│   └── design_notes.md  # Architecture decisions and trade-offs
+├── comparison_analysis.md  # Anomaly vs. rule-based detection comparison
+├── config.yaml
+└── main.py
+```
 
 ---
 
-## Background
+## Stack
 
-Isolation Forest works by randomly partitioning the feature space using binary trees. Anomalous points — which tend to be sparse and different — require fewer splits to isolate, yielding lower anomaly scores. This makes it well-suited for high-dimensional, unlabeled log data where "normal" behaviour is hard to define explicitly.
+Python, scikit-learn, pandas
+
+---
+
+## Future direction
+
+The main limitation of anomaly-based detection is that it treats each log entry independently. A single unusual request may not be anomalous in isolation—but as part of a sequence (recon → exploitation → lateral movement), it becomes highly significant.
+
+Provenance-based detection addresses this by tracking *how events are connected*, not just whether individual events look unusual. Inspired by discussions with Prof. Chen Ang (UMich), this is the direction I want to explore next.
 
 ---
 

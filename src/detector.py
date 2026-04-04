@@ -7,6 +7,17 @@ sklearn's IsolationForest returns:
 
 The `score_samples` method returns the raw anomaly score;
 lower (more negative) = more anomalous.
+
+Design note:
+Isolation Forest treats each log entry independently — it scores how
+unusual a single feature vector looks relative to the rest of the dataset.
+This works well for obvious outliers (a scanner hitting 404s at 3am), but
+produces false positives for benign-but-rare events and misses multi-step
+attack sequences where each individual request looks unremarkable.
+
+Future: provenance-based detection would track event relationships (e.g.,
+the same IP doing recon → auth failures → data access) rather than scoring
+entries in isolation. That context is what separates noise from real signal.
 """
 
 import pandas as pd

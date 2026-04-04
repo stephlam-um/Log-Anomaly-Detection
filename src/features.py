@@ -72,7 +72,12 @@ class FeatureExtractor:
         else:
             features["path_depth"] = 1
 
-        # Per-IP request volume (session-level, not windowed yet)
+        # Per-IP request volume — a strong signal for brute-force and scanning.
+        # Counting total requests per IP (session-level) is a blunt instrument:
+        # it catches high-volume attackers but misses slow/distributed attacks
+        # where each IP makes only a handful of requests.
+        # A sliding time window (e.g., requests-per-IP per 5 minutes) would
+        # improve this, at the cost of added complexity.
         if "ip" in df.columns:
             ip_counts = df["ip"].map(df["ip"].value_counts())
             features["ip_request_count"] = ip_counts.fillna(1).astype(int)

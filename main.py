@@ -62,6 +62,11 @@ def main():
     extractor = FeatureExtractor(config=config.get("features", {}))
     feature_df = extractor.transform(parsed_df)
 
+    # Anomaly detection treats each log entry independently.
+    # This catches unusual patterns but produces false positives without context.
+    # Future: provenance tracking could improve signal-to-noise by linking
+    # related events (recon → auth failure → access) into chains rather than
+    # scoring each request in isolation.
     print("[*] Running Isolation Forest...")
     detector = AnomalyDetector(config=config.get("detector", {}))
     results_df = detector.fit_predict(feature_df, parsed_df)
