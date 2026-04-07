@@ -1,22 +1,9 @@
 # Log Anomaly Detection
 
-> **Project status: Archived**
-> This project evolved into something more operationally relevant.
->
-> Building the detection pipeline raised a question I couldn't ignore: in a
-> real SOC, the problem was never "did the model detect the attack?" — it's
-> "why did this alert fire, is it worth my time, and what should I do about
-> it?" Most detection projects stop at the F1 score. That's not where the
-> operational pain is.
->
-> The dataset evaluation also surfaced real limitations: CSIC 2010 splits
-> HTTP requests across per-parameter rows rather than treating each request
-> as one instance, and its 55% anomaly rate undermines the core assumption
-> of unsupervised methods like Isolation Forest.
->
-> Rather than start over, the follow-on project keeps what was working here
-> — feature engineering, model comparison, evaluation — and adds an
-> explainability layer on top. See [Actionable-CF-NIDS](https://github.com/stephlam-um/Actionable-CF-NIDS) for current work.
+> [!WARNING]
+> **This repository is archived and no longer maintained.**
+> In a real SOC, the harder problem isn't detection — it's explainability: why did this alert fire, is it worth my time, and what should I do about it? This project stops at the F1 score. The follow-on work goes further.
+> See [Actionable-CF-NIDS](https://github.com/stephlam-um/Actionable-CF-NIDS) for current work.
 
 Detecting HTTP attacks using unsupervised anomaly detection and session-level sequence graphs, validated on real labeled data.
 
