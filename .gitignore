@@ -14,3 +14,4 @@ output/
 *.csv
 !data/sample_logs/
 .DS_Store
+building plan.md

@@ -15,7 +15,7 @@ Features computed (for HTTP logs):
 
 import pandas as pd
 import numpy as np
-
+from typing import Optional
 
 METHOD_MAP = {"GET": 0, "POST": 1, "PUT": 2, "DELETE": 3, "HEAD": 4, "OPTIONS": 5}
 
@@ -23,7 +23,7 @@ METHOD_MAP = {"GET": 0, "POST": 1, "PUT": 2, "DELETE": 3, "HEAD": 4, "OPTIONS": 
 class FeatureExtractor:
     """Transforms a parsed log DataFrame into a numeric feature matrix."""
 
-    def __init__(self, config: dict = None):
+    def __init__(self, config: Optional[dict] = None):
         self.config = config or {}
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:

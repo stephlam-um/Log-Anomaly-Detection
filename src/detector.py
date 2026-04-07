@@ -20,6 +20,8 @@ the same IP doing recon → auth failures → data access) rather than scoring
 entries in isolation. That context is what separates noise from real signal.
 """
 
+from typing import Optional
+
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -37,7 +39,7 @@ class AnomalyDetector:
         max_samples    : int or "auto" (default "auto")
     """
 
-    def __init__(self, config: dict = None):
+    def __init__(self, config: Optional[dict] = None):
         cfg = config or {}
         self.contamination = cfg.get("contamination", 0.05)
         self.n_estimators = cfg.get("n_estimators", 200)
