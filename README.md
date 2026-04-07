@@ -1,9 +1,13 @@
 # Log Anomaly Detection
 
 > [!WARNING]
-> **This repository is archived and no longer maintained.**
-> In a real SOC, the harder problem isn't detection — it's explainability: why did this alert fire, is it worth my time, and what should I do about it? This project stops at the F1 score. The follow-on work goes further.
-> See [Actionable-CF-NIDS](https://github.com/stephlam-um/Actionable-CF-NIDS) for current work.
+> **This repository is archived and no longer actively maintained.**
+>
+> I ran into some fundamental issues with the CSIC 2010 dataset midway through — HTTP requests are split across per-parameter rows rather than one row per request, and the ~55% anomaly rate breaks the assumptions that unsupervised methods like Isolation Forest rely on. Continuing didn't feel worth it.
+>
+> More importantly, I realised the question I actually wanted to answer was different. From what I've seen in a SOC environment, the bottleneck isn't whether the model catches the attack — it's whether the analyst can trust and act on the alert. Most detection engineering projects stop at the F1 score. I would like to go one step further into the part that actually matters operationally.
+>
+> The follow-on project keeps the groundwork from here (feature engineering, model comparison, evaluation pipeline) and builds an explainability layer on top. See [Actionable-CF-NIDS](https://github.com/stephlam-um/Actionable-CF-NIDS) if you're curious where this went.
 
 Detecting HTTP attacks using unsupervised anomaly detection and session-level sequence graphs, validated on real labeled data.
 
